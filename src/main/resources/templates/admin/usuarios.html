@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Usuarios - Admin HabiliUSCO</title><link rel="stylesheet" href="/css/styles.css"></head>
+<body>
+<div class="admin-layout">
+  <div class="admin-sidebar">
+    <div class="logo">Habili<span>USCO</span></div>
+    <nav class="admin-nav">
+      <a href="/admin" class="admin-nav-link">📊 Dashboard</a>
+      <a href="/admin/usuarios" class="admin-nav-link active">👥 Usuarios</a>
+      <a href="/admin/servicios" class="admin-nav-link">🛠 Servicios</a>
+      <a href="/admin/reservas" class="admin-nav-link">📅 Reservas</a>
+      <a href="/admin/logs" class="admin-nav-link">📋 Logs</a>
+      <hr style="border-color:rgba(255,255,255,0.1); margin:1rem 0">
+      <a href="/portal" class="admin-nav-link">🏠 Portal</a>
+      <a href="#" class="admin-nav-link" onclick="logout()">🚪 Salir</a>
+    </nav>
+  </div>
+  <div class="admin-content">
+    <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
+    <h1 style="font-size:1.5rem; font-weight:900; margin-bottom:1.5rem">👥 Gestión de Usuarios</h1>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Usuario</th><th>Email</th><th>Facultad</th><th>Roles</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            <tr th:each="u : ${usuarios}">
+              <td>
+                <div style="font-weight:600" th:text="${u.nombreCompleto}"></div>
+                <div style="font-size:0.8rem; color:var(--gray)" th:text="'@' + ${u.username}"></div>
+              </td>
+              <td th:text="${u.email}"></td>
+              <td th:text="${u.facultad}"></td>
+              <td>
+                <div style="display:flex; gap:0.25rem; flex-wrap:wrap">
+                  <span th:each="rol : ${u.roles}" class="category-badge" th:text="${rol}"></span>
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" th:classappend="${u.activo} ? 'status-ACTIVO' : 'status-INACTIVO'"
+                      th:text="${u.activo ? 'Activo' : 'Inactivo'}"></span>
+              </td>
+              <td>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap">
+                  <form th:action="@{/admin/usuarios/{id}/toggle(id=${u.id})}" method="post">
+                    <button class="btn btn-sm" th:classappend="${u.activo} ? 'btn-warning' : 'btn-secondary'"
+                            th:text="${u.activo ? 'Desactivar' : 'Activar'}"></button>
+                  </form>
+                  <form th:action="@{/admin/usuarios/{id}/rol(id=${u.id})}" method="post" style="display:flex; gap:0.35rem">
+                    <select name="rol" class="form-control" style="padding:0.25rem 0.5rem; font-size:0.8rem; height:auto">
+                      <option value="ADMIN">ADMIN</option>
+                      <option value="USER">USER</option>
+                    </select>
+                    <button class="btn btn-outline btn-sm">Toggle rol</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>

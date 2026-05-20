@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Servicio - HabiliUSCO</title>
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/portal" class="nav-brand">Habili<span>USCO</span></a>
+    <div class="nav-links">
+      <a href="/portal" class="nav-link">Explorar</a>
+      <a href="/mis-servicios" class="nav-link active">Mis Servicios</a>
+      <a href="/reservas/mis-reservas" class="nav-link nav-badge">Reservas</a>
+      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link" style="color:var(--secondary)">⚙ Admin</a></sec:authorize>
+      <a href="#" class="btn btn-outline btn-sm" onclick="logout()">Salir</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-container" style="max-width:700px">
+  <div style="margin-bottom:1rem"><a href="/mis-servicios" style="color:var(--primary); text-decoration:none">← Mis Servicios</a></div>
+
+  <div class="card">
+    <div class="card-body">
+      <h2 style="font-weight:800; margin-bottom:1.5rem"
+          th:text="${servicio.id != null ? 'Editar servicio' : 'Publicar nuevo servicio'}"></h2>
+
+      <form th:action="${servicio.id != null ? '/mis-servicios/actualizar/' + servicio.id : '/mis-servicios/crear'}" 
+            method="post" th:object="${servicio}">
+
+        <div class="form-group">
+          <label class="form-label">Título del servicio *</label>
+          <input type="text" name="titulo" class="form-control" th:value="*{titulo}" required
+                 placeholder="Ej: Monitoría de Cálculo, Diseño de logos..." maxlength="100">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem">
+          <div class="form-group">
+            <label class="form-label">Categoría *</label>
+            <select name="categoria" class="form-control" required>
+              <option value="">Selecciona...</option>
+              <option th:each="cat : ${ {'MONITORIA','TUTORIA','REPARACION','DISEÑO','PROGRAMACION','TRADUCCION','OTRO'} }"
+                      th:value="${cat}" th:text="${cat}" th:selected="*{categoria == cat}"></option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Precio base (COP)</label>
+            <input type="number" name="precioBase" class="form-control" th:value="*{precioBase}"
+                   placeholder="0 = negociable" min="0" step="1000">
+            <div class="form-hint">Déjalo vacío si es negociable</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Descripción *</label>
+          <textarea name="descripcion" class="form-control" rows="5" required maxlength="1000"
+                    placeholder="Describe detalladamente qué ofreces, tu experiencia, condiciones..." 
+                    th:text="*{descripcion}"></textarea>
+        </div>
+
+        <div class="form-group" th:if="${servicio.id != null}">
+          <label class="form-label">Estado</label>
+          <select name="estado" class="form-control">
+            <option th:each="e : ${ {'ACTIVO','PAUSADO','INACTIVO'} }" th:value="${e}" th:text="${e}" th:selected="*{estado == e}"></option>
+          </select>
+        </div>
+
+        <div style="display:flex; gap:1rem; margin-top:1.5rem">
+          <button type="submit" class="btn btn-primary btn-lg" th:text="${servicio.id != null ? 'Guardar cambios' : 'Publicar servicio'}"></button>
+          <a href="/mis-servicios" class="btn btn-ghost btn-lg">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>

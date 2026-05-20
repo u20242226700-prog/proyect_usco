@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal - HabiliUSCO</title>
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/portal" class="nav-brand">Habili<span>USCO</span></a>
+    <form class="nav-search" th:action="@{/portal}" method="get">
+      <input type="text" name="q" placeholder="Buscar servicios..." th:value="${busqueda}">
+      <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
+    </form>
+    <div class="nav-links">
+      <a href="/portal" class="nav-link active">Explorar</a>
+      <a href="/mis-servicios" class="nav-link">Mis Servicios</a>
+      <a href="/reservas/mis-reservas" class="nav-link nav-badge">
+        Reservas
+        <span class="badge-count" th:if="${mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}"></span>
+      </a>
+      <sec:authorize access="hasRole('ADMIN')">
+        <a href="/admin" class="nav-link" style="color:var(--secondary)">⚙ Admin</a>
+      </sec:authorize>
+      <a href="#" class="btn btn-outline btn-sm" onclick="logout()">Salir</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-container">
+  <!-- HERO search -->
+  <div th:if="${busqueda == null and categoriaActiva == null}" 
+       style="text-align:center; padding:2.5rem 0 1.5rem; background:linear-gradient(135deg,#6C3BD5,#4A27A0); margin:-1.5rem -1.5rem 1.5rem; border-radius:0 0 20px 20px; color:white">
+    <h1 style="font-size:2rem; font-weight:900; margin-bottom:0.5rem">Intercambia habilidades en la USCO</h1>
+    <p style="opacity:0.85">Conecta con compañeros universitarios y accede a servicios únicos</p>
+  </div>
+
+  <!-- Filtros por categoría -->
+  <div class="search-bar">
+    <span style="font-weight:600; color:var(--dark); font-size:0.9rem">Categorías:</span>
+    <div class="filter-chips">
+      <a href="/portal" class="chip" th:classappend="${categoriaActiva == null and busqueda == null} ? 'active' : ''">Todos</a>
+      <a th:each="cat : ${categorias}" th:href="@{/portal(categoria=${cat})}" th:text="${cat}" 
+         class="chip" th:classappend="${cat == categoriaActiva} ? 'active' : ''"></a>
+    </div>
+    <a href="/mis-servicios/nuevo" class="btn btn-secondary btn-sm" style="margin-left:auto">+ Publicar servicio</a>
+  </div>
+
+  <!-- Resultados -->
+  <div th:if="${busqueda != null}" class="page-header">
+    <div>
+      <div class="page-title">Resultados para "<span th:text="${busqueda}"></span>"</div>
+      <div class="page-subtitle" th:text="${#lists.size(servicios)} + ' servicios encontrados'"></div>
+    </div>
+    <a href="/portal" class="btn btn-ghost btn-sm">✕ Limpiar búsqueda</a>
+  </div>
+
+  <!-- Grid servicios -->
+  <div th:if="${#lists.isEmpty(servicios)}" class="empty-state" style="background:white; border-radius:var(--radius); padding:4rem; box-shadow:var(--shadow)">
+    <div class="icon">🔍</div>
+    <h3>No se encontraron servicios</h3>
+    <p>Intenta con otra búsqueda o <a href="/mis-servicios/nuevo" style="color:var(--primary)">publica el primero</a></p>
+  </div>
+
+  <div class="services-grid" th:unless="${#lists.isEmpty(servicios)}">
+    <div th:each="s : ${servicios}" class="service-card">
+      <div class="service-card-header">
+        <div class="category-icon" th:switch="${s.categoria}">
+          <span th:case="'MONITORIA'">📚</span>
+          <span th:case="'REPARACION'">🔧</span>
+          <span th:case="'DISEÑO'">🎨</span>
+          <span th:case="'PROGRAMACION'">💻</span>
+          <span th:case="'TRADUCCION'">🌐</span>
+          <span th:case="'TUTORIA'">🎓</span>
+          <span th:case="*">⭐</span>
+        </div>
+        <div>
+          <div class="service-title" th:text="${s.titulo}"></div>
+          <div class="service-user">👤 <span th:text="${s.usuario.nombreCompleto}"></span></div>
+        </div>
+      </div>
+      <div class="service-card-body">
+        <span class="category-badge" th:text="${s.categoria}"></span>
+        <p class="service-desc" th:text="${s.descripcion}" style="margin-top:0.6rem"></p>
+      </div>
+      <div class="service-card-footer">
+        <span class="price-tag" th:if="${s.precioBase != null}" th:text="'$' + ${#numbers.formatDecimal(s.precioBase,0,'COMMA',0,'POINT')}"></span>
+        <span class="price-tag no-price" th:unless="${s.precioBase != null}">Precio negociable</span>
+        <a th:href="@{/portal/servicio/{id}(id=${s.id})}" class="btn btn-primary btn-sm">Ver servicio →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

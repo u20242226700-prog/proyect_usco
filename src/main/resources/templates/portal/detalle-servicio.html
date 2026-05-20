@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title th:text="${servicio.titulo} + ' - HabiliUSCO'"></title>
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/portal" class="nav-brand">Habili<span>USCO</span></a>
+    <div class="nav-links">
+      <a href="/portal" class="nav-link">Explorar</a>
+      <a href="/mis-servicios" class="nav-link">Mis Servicios</a>
+      <a href="/reservas/mis-reservas" class="nav-link nav-badge">
+        Reservas
+        <span class="badge-count" th:if="${mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}"></span>
+      </a>
+      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link" style="color:var(--secondary)">⚙ Admin</a></sec:authorize>
+      <a href="#" class="btn btn-outline btn-sm" onclick="logout()">Salir</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-container">
+  <div style="margin-bottom:1rem"><a href="/portal" style="color:var(--primary); text-decoration:none">← Volver al portal</a></div>
+
+  <div class="layout-2col">
+    <!-- Detalle principal -->
+    <div>
+      <div class="card">
+        <div class="card-body">
+          <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem">
+            <span class="category-badge" th:text="${servicio.categoria}"></span>
+            <span class="status-badge" th:classappend="'status-' + ${servicio.estado}" th:text="${servicio.estado}"></span>
+          </div>
+
+          <h1 style="font-size:1.6rem; font-weight:800; margin-bottom:0.75rem" th:text="${servicio.titulo}"></h1>
+
+          <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; padding:1rem; background:var(--light); border-radius:10px">
+            <div style="width:48px; height:48px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; color:white; font-size:1.3rem; font-weight:700">
+              <span th:text="${#strings.substring(servicio.usuario.nombreCompleto,0,1)}"></span>
+            </div>
+            <div>
+              <div style="font-weight:700" th:text="${servicio.usuario.nombreCompleto}"></div>
+              <div style="font-size:0.85rem; color:var(--gray)" th:text="${servicio.usuario.facultad} + ' - ' + ${servicio.usuario.programa}"></div>
+            </div>
+          </div>
+
+          <h3 style="font-weight:700; margin-bottom:0.75rem">Descripción del servicio</h3>
+          <p style="color:var(--gray); line-height:1.7; font-size:0.95rem" th:text="${servicio.descripcion}"></p>
+
+          <div th:if="${servicio.precioBase != null}" style="margin-top:1.5rem; padding:1rem; background:var(--primary-light); border-radius:10px; border-left:4px solid var(--primary)">
+            <div style="font-size:0.85rem; color:var(--gray)">Precio base</div>
+            <div style="font-size:1.75rem; font-weight:900; color:var(--primary)" th:text="'$' + ${#numbers.formatDecimal(servicio.precioBase,0,'COMMA',0,'POINT')}"></div>
+            <div style="font-size:0.8rem; color:var(--gray)">Negociable al reservar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel de reserva -->
+    <div>
+      <div class="card" th:if="${!esPropio}">
+        <div class="card-body">
+          <h3 style="font-weight:700; margin-bottom:1rem; font-size:1.1rem">📅 Reservar este servicio</h3>
+
+          <form th:action="@{/reservas/solicitar}" method="post">
+            <input type="hidden" name="servicioId" th:value="${servicio.id}">
+
+            <div class="form-group">
+              <label class="form-label">Fecha deseada *</label>
+              <input id="fechaReserva" name="fecha" type="date" class="form-control" required>
+              <div id="dateHint" class="calendar-hint">Selecciona una fecha disponible</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Precio que ofreces</label>
+              <div style="display:flex; align-items:center; gap:0.5rem">
+                <span style="font-weight:700; color:var(--gray)">$</span>
+                <input name="precioPropuesto" type="number" class="form-control" 
+                       placeholder="0" min="0" step="1000"
+                       th:value="${servicio.precioBase}">
+              </div>
+              <div class="form-hint">Puedes negociar el precio después</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mensaje al proveedor</label>
+              <textarea name="mensaje" class="form-control" rows="3" placeholder="Cuéntale qué necesitas exactamente..."></textarea>
+            </div>
+
+            <button type="submit" id="btnSolicitar" class="btn btn-primary btn-full btn-lg">
+              Enviar solicitud
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card" th:if="${esPropio}" style="border:2px solid var(--primary)">
+        <div class="card-body" style="text-align:center; padding:2rem">
+          <div style="font-size:2rem; margin-bottom:1rem">👤</div>
+          <h3 style="margin-bottom:0.5rem">Este es tu servicio</h3>
+          <p style="color:var(--gray); margin-bottom:1rem; font-size:0.9rem">Gestiona tus reservas desde el panel de reservas</p>
+          <a th:href="@{/mis-servicios/editar/{id}(id=${servicio.id})}" class="btn btn-outline btn-full" style="margin-bottom:0.5rem">✏ Editar servicio</a>
+          <a href="/reservas/mis-reservas" class="btn btn-primary btn-full">Ver mis reservas</a>
+        </div>
+      </div>
+
+      <!-- Info proveedor -->
+      <div class="card" style="margin-top:1rem">
+        <div class="card-body">
+          <h4 style="font-weight:700; margin-bottom:0.75rem; font-size:0.95rem">📌 Sobre el proveedor</h4>
+          <div style="font-size:0.9rem; color:var(--gray); display:flex; flex-direction:column; gap:0.4rem">
+            <span>✉ <span th:text="${servicio.usuario.email}"></span></span>
+            <span th:if="${servicio.usuario.telefono != null}">📞 <span th:text="${servicio.usuario.telefono}"></span></span>
+            <span th:if="${servicio.usuario.facultad != null}">🏛 <span th:text="${servicio.usuario.facultad}"></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Inject occupied dates
+window.fechasOcupadas = /*[[${fechasOcupadas}]]*/ [];
+</script>
+<script src="/js/app.js"></script>
+</body>
+</html>
