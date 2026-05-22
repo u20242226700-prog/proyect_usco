@@ -9,32 +9,39 @@
 <body>
 <div class="auth-page">
   <div class="auth-card">
-    <div class="auth-logo">Habili<span>USCO</span></div>
-    <div class="auth-title">¡Bienvenido de vuelta!</div>
-    <div class="auth-sub">Ingresa tus credenciales para continuar</div>
+    <div class="auth-header">
+      <div class="auth-logo-circle">U</div>
+      <div class="auth-brand">Habili<span>USCO</span></div>
+      <div class="auth-title">Bienvenido</div>
+      <div class="auth-subtitle">Universidad Surcolombiana</div>
+    </div>
+
+    <div class="gold-line"></div>
 
     <div id="loginError" class="alert alert-danger" style="display:none"></div>
 
     <form id="loginForm">
       <div class="form-group">
-        <label class="form-label">Usuario</label>
+        <label class="form-label">👤 Usuario</label>
         <input id="username" type="text" class="form-control" placeholder="tu_usuario" required autocomplete="username">
       </div>
       <div class="form-group">
-        <label class="form-label">Contraseña</label>
+        <label class="form-label">🔒 Contraseña</label>
         <input id="password" type="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
       </div>
-      <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:0.5rem">
+      <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:0.5rem; background:var(--primary)">
         Iniciar Sesión
       </button>
     </form>
 
-    <p style="text-align:center; margin-top:1.5rem; font-size:0.9rem; color:var(--gray)">
-      ¿No tienes cuenta? <a href="/registro" style="color:var(--primary); font-weight:600">Regístrate gratis</a>
+    <hr class="divider">
+
+    <p style="text-align:center; font-size:0.9rem; color:var(--gray)">
+      ¿No tienes cuenta? <a href="/registro" style="color:var(--primary); font-weight:700">Regístrate aquí</a>
     </p>
 
-    <div style="margin-top:1.5rem; padding:1rem; background:var(--light); border-radius:8px; font-size:0.82rem; color:var(--gray)">
-      <strong>Demo:</strong> admin / admin123 &nbsp;|&nbsp; daniel / 123456
+    <div style="margin-top:1.25rem; padding:0.85rem 1rem; background:var(--gold-light); border-radius:8px; font-size:0.8rem; color:var(--gold-dark); border:1px solid var(--gold)">
+      <strong>🔑 Demo:</strong> admin / admin123 &nbsp;|&nbsp; daniel / 123456
     </div>
   </div>
 </div>

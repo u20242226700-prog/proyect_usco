@@ -8,67 +8,86 @@
 <body>
 <nav class="navbar">
   <div class="nav-container">
-    <a href="/portal" class="nav-brand">Habili<span>USCO</span></a>
+    <a href="/portal" class="nav-brand">
+      <div class="nav-logo">U</div>
+      <div class="nav-brand-text">
+        <div class="nav-brand-name">Habili<span>USCO</span></div>
+        <div class="nav-brand-sub">Universidad Surcolombiana</div>
+      </div>
+    </a>
     <div class="nav-links">
-      <a href="/portal" class="nav-link">Explorar</a>
-      <a href="/mis-servicios" class="nav-link active">Mis Servicios</a>
-      <a href="/reservas/mis-reservas" class="nav-link nav-badge">Reservas</a>
-      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link" style="color:var(--secondary)">⚙ Admin</a></sec:authorize>
-      <a href="#" class="btn btn-outline btn-sm" onclick="logout()">Salir</a>
+      <a href="/portal" class="nav-link">🏠 Explorar</a>
+      <a href="/mis-servicios" class="nav-link active">📋 Mis Servicios</a>
+      <a href="/reservas/mis-reservas" class="nav-link">📅 Reservas</a>
+      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link nav-link-gold">⚙ Admin</a></sec:authorize>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Salir</button>
     </div>
   </div>
 </nav>
 
-<div class="page-container" style="max-width:700px">
-  <div style="margin-bottom:1rem"><a href="/mis-servicios" style="color:var(--primary); text-decoration:none">← Mis Servicios</a></div>
+<div class="page-container" style="max-width:750px">
+  <div style="margin-bottom:1rem"><a href="/mis-servicios" style="color:var(--primary); text-decoration:none; font-weight:600">← Mis Servicios</a></div>
 
   <div class="card">
-    <div class="card-body">
-      <h2 style="font-weight:800; margin-bottom:1.5rem"
-          th:text="${servicio.id != null ? 'Editar servicio' : 'Publicar nuevo servicio'}"></h2>
+    <div style="background:linear-gradient(135deg,var(--primary),var(--primary-dark)); padding:1.5rem; color:white; border-radius:var(--radius) var(--radius) 0 0">
+      <h2 style="font-weight:900; font-size:1.4rem" th:text="${servicio.id != null ? '✏ Editar servicio' : '🚀 Publicar nuevo servicio'}"></h2>
+      <p style="opacity:0.8; font-size:0.875rem; margin-top:0.25rem">Comparte tu habilidad con la comunidad universitaria USCO</p>
+    </div>
+    <div class="card-body" style="padding:2rem">
 
-      <form th:action="${servicio.id != null ? '/mis-servicios/actualizar/' + servicio.id : '/mis-servicios/crear'}" 
+      <form th:action="${servicio.id != null ? '/mis-servicios/actualizar/' + servicio.id : '/mis-servicios/crear'}"
             method="post" th:object="${servicio}">
 
         <div class="form-group">
-          <label class="form-label">Título del servicio *</label>
+          <label class="form-label">📌 Título del servicio *</label>
           <input type="text" name="titulo" class="form-control" th:value="*{titulo}" required
-                 placeholder="Ej: Monitoría de Cálculo, Diseño de logos..." maxlength="100">
+                 placeholder="Ej: Monitoría de Cálculo I, Diseño de logos, Reparación de PC..."
+                 maxlength="100">
+          <div class="form-hint">Sé específico y claro para atraer más clientes</div>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem">
           <div class="form-group">
-            <label class="form-label">Categoría *</label>
+            <label class="form-label">📂 Categoría *</label>
             <select name="categoria" class="form-control" required>
-              <option value="">Selecciona...</option>
-              <option th:each="cat : ${ {'MONITORIA','TUTORIA','REPARACION','DISEÑO','PROGRAMACION','TRADUCCION','OTRO'} }"
-                      th:value="${cat}" th:text="${cat}" th:selected="*{categoria == cat}"></option>
+              <option value="">Selecciona una categoría...</option>
+              <option value="MONITORIA" th:selected="*{categoria == 'MONITORIA'}">📚 Monitoría</option>
+              <option value="TUTORIA" th:selected="*{categoria == 'TUTORIA'}">🎓 Tutoría</option>
+              <option value="REPARACION" th:selected="*{categoria == 'REPARACION'}">🔧 Reparación</option>
+              <option value="DISEÑO" th:selected="*{categoria == 'DISEÑO'}">🎨 Diseño</option>
+              <option value="PROGRAMACION" th:selected="*{categoria == 'PROGRAMACION'}">💻 Programación</option>
+              <option value="TRADUCCION" th:selected="*{categoria == 'TRADUCCION'}">🌐 Traducción</option>
+              <option value="OTRO" th:selected="*{categoria == 'OTRO'}">⭐ Otro</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Precio base (COP)</label>
+            <label class="form-label">💰 Precio base (COP)</label>
             <input type="number" name="precioBase" class="form-control" th:value="*{precioBase}"
-                   placeholder="0 = negociable" min="0" step="1000">
-            <div class="form-hint">Déjalo vacío si es negociable</div>
+                   placeholder="Ej: 50000" min="0" step="1000">
+            <div class="form-hint">Déjalo vacío si es precio negociable</div>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Descripción *</label>
-          <textarea name="descripcion" class="form-control" rows="5" required maxlength="1000"
-                    placeholder="Describe detalladamente qué ofreces, tu experiencia, condiciones..." 
+          <label class="form-label">📝 Descripción del servicio *</label>
+          <textarea name="descripcion" class="form-control" rows="6" required maxlength="1000"
+                    placeholder="Describe qué ofreces, tu nivel de experiencia, qué incluye el servicio, horarios disponibles, condiciones especiales..."
                     th:text="*{descripcion}"></textarea>
+          <div class="form-hint">Mínimo 50 caracteres. Una buena descripción genera más solicitudes.</div>
         </div>
 
         <div class="form-group" th:if="${servicio.id != null}">
-          <label class="form-label">Estado</label>
+          <label class="form-label">📊 Estado del servicio</label>
           <select name="estado" class="form-control">
-            <option th:each="e : ${ {'ACTIVO','PAUSADO','INACTIVO'} }" th:value="${e}" th:text="${e}" th:selected="*{estado == e}"></option>
+            <option value="ACTIVO" th:selected="*{estado == 'ACTIVO'}">✅ Activo - Visible en el portal</option>
+            <option value="PAUSADO" th:selected="*{estado == 'PAUSADO'}">⏸ Pausado - Temporalmente no disponible</option>
+            <option value="INACTIVO" th:selected="*{estado == 'INACTIVO'}">❌ Inactivo - No visible</option>
           </select>
         </div>
 
-        <div style="display:flex; gap:1rem; margin-top:1.5rem">
-          <button type="submit" class="btn btn-primary btn-lg" th:text="${servicio.id != null ? 'Guardar cambios' : 'Publicar servicio'}"></button>
+        <div style="display:flex; gap:1rem; margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--border)">
+          <button type="submit" class="btn btn-primary btn-lg"
+                  th:text="${servicio.id != null ? '💾 Guardar cambios' : '🚀 Publicar servicio'}"></button>
           <a href="/mis-servicios" class="btn btn-ghost btn-lg">Cancelar</a>
         </div>
       </form>

@@ -30,7 +30,7 @@ public class Servicio {
     @Column(name = "imagen_url", length = 255)
     private String imagenUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 

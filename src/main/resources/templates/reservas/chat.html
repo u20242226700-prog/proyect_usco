@@ -8,26 +8,33 @@
 <body>
 <nav class="navbar">
   <div class="nav-container">
-    <a href="/portal" class="nav-brand">Habili<span>USCO</span></a>
+    <a href="/portal" class="nav-brand">
+      <div class="nav-logo">U</div>
+      <div class="nav-brand-text">
+        <div class="nav-brand-name">Habili<span>USCO</span></div>
+        <div class="nav-brand-sub">Universidad Surcolombiana</div>
+      </div>
+    </a>
     <div class="nav-links">
-      <a href="/portal" class="nav-link">Explorar</a>
       <a href="/reservas/mis-reservas" class="nav-link">← Mis Reservas</a>
-      <a href="#" class="btn btn-outline btn-sm" onclick="logout()">Salir</a>
+      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link nav-link-gold">⚙ Admin</a></sec:authorize>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Salir</button>
     </div>
   </div>
 </nav>
 
-<div class="page-container" style="max-width:1000px">
+<div class="page-container" style="max-width:1100px">
   <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
 
   <div style="display:grid; grid-template-columns:1fr 320px; gap:1.5rem; align-items:start">
-    <!-- Chat principal -->
-    <div class="card" style="border:1px solid var(--border)">
+
+    <!-- CHAT -->
+    <div class="card chat-container" style="border-top:4px solid var(--primary)">
       <div class="chat-header">
         <div style="flex:1">
-          <h3 style="font-weight:700; margin-bottom:0.2rem" th:text="${reserva.servicio.titulo}"></h3>
-          <div style="font-size:0.85rem; color:var(--gray)">
-            📅 <span th:text="${reserva.fechaReserva}"></span> &nbsp;|&nbsp;
+          <div style="font-weight:800; font-size:1.1rem" th:text="${reserva.servicio.titulo}"></div>
+          <div style="font-size:0.82rem; opacity:0.85; margin-top:0.2rem">
+            📅 <span th:text="${reserva.fechaReserva}"></span> &nbsp;·&nbsp;
             Con: <strong th:text="${esSolicitante ? reserva.servicio.usuario.nombreCompleto : reserva.solicitante.nombreCompleto}"></strong>
           </div>
         </div>
@@ -35,8 +42,10 @@
       </div>
 
       <div class="chat-messages">
-        <div th:if="${#lists.isEmpty(mensajes)}" style="text-align:center; color:var(--gray); padding:2rem">
-          Inicia la conversación 👋
+        <div th:if="${#lists.isEmpty(mensajes)}" style="text-align:center; color:var(--gray); padding:3rem">
+          <div style="font-size:2rem; margin-bottom:0.5rem">👋</div>
+          <div style="font-weight:600">¡Inicia la conversación!</div>
+          <div style="font-size:0.875rem; margin-top:0.25rem">Presenta tu propuesta y negocia el precio</div>
         </div>
 
         <div th:each="m : ${mensajes}"
@@ -47,74 +56,103 @@
       </div>
 
       <div class="chat-input-bar">
-        <form th:action="@{/reservas/chat/{id}/enviar(id=${reserva.id})}" method="post" style="display:flex; gap:0.75rem; width:100%; align-items:flex-end">
-          <textarea name="contenido" class="auto-resize" placeholder="Escribe un mensaje..." rows="1" required style="flex:1; padding:0.65rem 1rem; border:1.5px solid var(--border); border-radius:12px; resize:none; outline:none; font-size:0.9rem; font-family:inherit"></textarea>
-          <button type="submit" class="btn btn-primary">Enviar</button>
+        <form th:action="@{/reservas/chat/{id}/enviar(id=${reserva.id})}" method="post"
+              style="display:flex; gap:0.75rem; width:100%; align-items:flex-end">
+          <textarea name="contenido" class="auto-resize form-control" placeholder="Escribe un mensaje... (Enter para enviar)"
+                    rows="1" required style="flex:1; border-radius:50px; padding:0.65rem 1.25rem"></textarea>
+          <button type="submit" class="btn btn-primary">Enviar ➤</button>
         </form>
       </div>
     </div>
 
-    <!-- Panel de acciones -->
+    <!-- PANEL LATERAL -->
     <div style="display:flex; flex-direction:column; gap:1rem">
+
       <!-- Info reserva -->
-      <div class="card">
+      <div class="card" style="border-top:4px solid var(--gold)">
         <div class="card-body">
-          <h4 style="font-weight:700; margin-bottom:1rem">📋 Detalles de la reserva</h4>
-          <div style="font-size:0.875rem; display:flex; flex-direction:column; gap:0.6rem; color:var(--gray)">
-            <div><strong>Servicio:</strong> <span th:text="${reserva.servicio.titulo}"></span></div>
-            <div><strong>Fecha:</strong> <span th:text="${reserva.fechaReserva}"></span></div>
-            <div th:if="${reserva.precioPropuesto != null}"><strong>Precio propuesto:</strong> $<span th:text="${reserva.precioPropuesto}"></span></div>
-            <div th:if="${reserva.precioAcordado != null}" style="color:var(--secondary)"><strong>✅ Precio acordado:</strong> $<span th:text="${reserva.precioAcordado}"></span></div>
+          <h4 style="font-weight:800; margin-bottom:1rem; color:var(--dark)">📋 Detalles</h4>
+          <div style="display:flex; flex-direction:column; gap:0.65rem; font-size:0.875rem">
+            <div style="display:flex; justify-content:space-between">
+              <span style="color:var(--gray)">Servicio</span>
+              <span style="font-weight:600; text-align:right; max-width:60%" th:text="${reserva.servicio.titulo}"></span>
+            </div>
+            <div style="display:flex; justify-content:space-between">
+              <span style="color:var(--gray)">Fecha</span>
+              <span style="font-weight:700; color:var(--primary)" th:text="${reserva.fechaReserva}"></span>
+            </div>
+            <div th:if="${reserva.precioPropuesto != null}" style="display:flex; justify-content:space-between">
+              <span style="color:var(--gray)">Precio ofrecido</span>
+              <span style="font-weight:600" th:text="'$' + ${reserva.precioPropuesto}"></span>
+            </div>
+            <div th:if="${reserva.precioAcordado != null}" style="display:flex; justify-content:space-between; padding:0.5rem; background:var(--gold-light); border-radius:6px; border:1px solid var(--gold)">
+              <span style="color:var(--gold-dark); font-weight:700">✅ Precio acordado</span>
+              <span style="font-weight:800; color:var(--gold-dark)" th:text="'$' + ${reserva.precioAcordado}"></span>
+            </div>
+            <div th:if="${reserva.mensaje != null and !reserva.mensaje.isEmpty()}" style="padding:0.6rem; background:var(--light); border-radius:6px; font-size:0.82rem; color:var(--gray)">
+              💬 <span th:text="${reserva.mensaje}"></span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Acciones proveedor -->
-      <div class="card" th:if="${esProveedor and (reserva.estado == 'PENDIENTE' or reserva.estado == 'NEGOCIANDO')}">
+      <div class="card" th:if="${esProveedor and (reserva.estado == 'PENDIENTE' or reserva.estado == 'NEGOCIANDO')}" style="border-top:4px solid var(--primary)">
         <div class="card-body">
-          <h4 style="font-weight:700; margin-bottom:1rem">⚡ Acciones</h4>
-
+          <h4 style="font-weight:800; margin-bottom:1rem">⚡ Gestionar solicitud</h4>
           <form th:action="@{/reservas/{id}/aceptar(id=${reserva.id})}" method="post" style="margin-bottom:0.5rem">
-            <button class="btn btn-secondary btn-full">✅ Aceptar reserva</button>
+            <button class="btn btn-success btn-full">✅ Aceptar reserva</button>
           </form>
-
           <form th:action="@{/reservas/{id}/rechazar(id=${reserva.id})}" method="post" style="margin-bottom:1rem">
-            <button class="btn btn-danger btn-full">✕ Rechazar</button>
+            <button class="btn btn-danger btn-full">✕ Rechazar solicitud</button>
           </form>
-
           <hr style="border-color:var(--border); margin-bottom:1rem">
-          <div style="font-weight:600; font-size:0.9rem; margin-bottom:0.5rem">💰 Proponer nuevo precio</div>
+          <div style="font-weight:700; font-size:0.875rem; margin-bottom:0.5rem; color:var(--dark)">💰 Proponer precio diferente</div>
           <form th:action="@{/reservas/{id}/negociar(id=${reserva.id})}" method="post" style="display:flex; gap:0.5rem">
-            <input type="number" name="nuevoPrecio" class="form-control" placeholder="0" min="0" step="1000" style="flex:1">
-            <button type="submit" class="btn btn-warning btn-sm">Proponer</button>
+            <input type="number" name="nuevoPrecio" class="form-control" placeholder="Ej: 60000" min="0" step="1000" style="flex:1">
+            <button type="submit" class="btn btn-gold btn-sm">Proponer</button>
           </form>
         </div>
       </div>
 
-      <!-- Acciones solicitante en negociación -->
-      <div class="card" th:if="${esSolicitante and reserva.estado == 'NEGOCIANDO'}">
+      <!-- Negociación solicitante -->
+      <div class="card" th:if="${esSolicitante and reserva.estado == 'NEGOCIANDO'}" style="border-top:4px solid var(--gold)">
         <div class="card-body">
-          <h4 style="font-weight:700; margin-bottom:1rem">💰 Negociación de precio</h4>
-          <p style="font-size:0.875rem; color:var(--gray); margin-bottom:1rem">El proveedor propuso: <strong>$<span th:text="${reserva.precioPropuesto}"></span></strong></p>
+          <h4 style="font-weight:800; margin-bottom:0.75rem">💰 Negociación de precio</h4>
+          <div style="padding:0.75rem; background:var(--gold-light); border-radius:8px; margin-bottom:1rem; border:1px solid var(--gold)">
+            <div style="font-size:0.8rem; color:var(--gold-dark)">El proveedor propone:</div>
+            <div style="font-size:1.4rem; font-weight:900; color:var(--gold-dark)" th:text="'$' + ${reserva.precioPropuesto} + ' COP'"></div>
+          </div>
           <form th:action="@{/reservas/{id}/aceptar-precio(id=${reserva.id})}" method="post" style="margin-bottom:0.5rem">
-            <button class="btn btn-secondary btn-full">✅ Aceptar precio</button>
+            <button class="btn btn-success btn-full">✅ Aceptar este precio</button>
           </form>
-          <form th:action="@{/reservas/{id}/negociar(id=${reserva.id})}" method="post" style="display:flex; gap:0.5rem; margin-top:0.5rem">
-            <input type="number" name="nuevoPrecio" class="form-control" placeholder="Contrapropuesta" min="0" step="1000" style="flex:1">
-            <button type="submit" class="btn btn-warning btn-sm">Contraproponer</button>
+          <div style="font-size:0.8rem; color:var(--gray); margin:0.75rem 0; text-align:center">— o haz una contrapropuesta —</div>
+          <form th:action="@{/reservas/{id}/negociar(id=${reserva.id})}" method="post" style="display:flex; gap:0.5rem">
+            <input type="number" name="nuevoPrecio" class="form-control" placeholder="Tu precio" min="0" step="1000" style="flex:1">
+            <button type="submit" class="btn btn-gold btn-sm">Proponer</button>
           </form>
         </div>
       </div>
 
-      <!-- Finalizar (solicitante en reserva aceptada) -->
-      <div class="card" th:if="${esSolicitante and reserva.estado == 'ACEPTADA'}">
-        <div class="card-body">
-          <h4 style="font-weight:700; margin-bottom:1rem">🎉 Reserva confirmada</h4>
-          <p style="font-size:0.875rem; color:var(--gray); margin-bottom:1rem">Cuando el servicio se haya completado, márcalo como finalizado.</p>
+      <!-- Finalizar -->
+      <div class="card" th:if="${esSolicitante and reserva.estado == 'ACEPTADA'}" style="border-top:4px solid var(--success)">
+        <div class="card-body" style="text-align:center">
+          <div style="font-size:2rem; margin-bottom:0.5rem">🎉</div>
+          <h4 style="font-weight:800; margin-bottom:0.5rem">¡Reserva confirmada!</h4>
+          <p style="font-size:0.875rem; color:var(--gray); margin-bottom:1rem">Cuando el servicio se complete, márcalo como finalizado.</p>
           <form th:action="@{/reservas/{id}/finalizar(id=${reserva.id})}" method="post">
-            <button class="btn btn-full" style="background:#0C4A6E; color:white">Marcar como finalizado</button>
+            <button class="btn btn-full" style="background:#1E40AF;color:white">Marcar como finalizado</button>
           </form>
         </div>
+      </div>
+
+      <!-- Cancelar -->
+      <div th:if="${reserva.estado == 'PENDIENTE' or reserva.estado == 'NEGOCIANDO'}">
+        <form th:action="@{/reservas/{id}/cancelar(id=${reserva.id})}" method="post">
+          <button class="btn btn-ghost btn-full btn-sm" onclick="return confirm('¿Cancelar esta reserva?')" style="color:var(--danger)">
+            Cancelar reserva
+          </button>
+        </form>
       </div>
     </div>
   </div>

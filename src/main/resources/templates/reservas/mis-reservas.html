@@ -8,15 +8,19 @@
 <body>
 <nav class="navbar">
   <div class="nav-container">
-    <a href="/portal" class="nav-brand">Habili<span>USCO</span></a>
+    <a href="/portal" class="nav-brand">
+      <div class="nav-logo">U</div>
+      <div class="nav-brand-text">
+        <div class="nav-brand-name">Habili<span>USCO</span></div>
+        <div class="nav-brand-sub">Universidad Surcolombiana</div>
+      </div>
+    </a>
     <div class="nav-links">
-      <a href="/portal" class="nav-link">Explorar</a>
-      <a href="/mis-servicios" class="nav-link">Mis Servicios</a>
-      <a href="/reservas/mis-reservas" class="nav-link active nav-badge">
-        Reservas<span class="badge-count" th:if="${mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}"></span>
-      </a>
-      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link" style="color:var(--secondary)">⚙ Admin</a></sec:authorize>
-      <a href="#" class="btn btn-outline btn-sm" onclick="logout()">Salir</a>
+      <a href="/portal" class="nav-link">🏠 Explorar</a>
+      <a href="/mis-servicios" class="nav-link">📋 Mis Servicios</a>
+      <a href="/reservas/mis-reservas" class="nav-link active">📅 Reservas</a>
+      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link nav-link-gold">⚙ Admin</a></sec:authorize>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Salir</button>
     </div>
   </div>
 </nav>
@@ -25,41 +29,46 @@
   <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
   <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-  <!-- Mis solicitudes enviadas -->
+  <!-- Enviadas -->
   <div style="margin-bottom:2.5rem">
     <div class="page-header">
-      <div class="page-title" style="font-size:1.3rem">📤 Solicitudes enviadas</div>
+      <div>
+        <div class="page-title">📤 Solicitudes <span>enviadas</span></div>
+        <div class="page-subtitle">Servicios que has solicitado a otros usuarios</div>
+      </div>
+      <a href="/portal" class="btn btn-primary btn-sm">+ Solicitar nuevo servicio</a>
     </div>
 
-    <div th:if="${#lists.isEmpty(reservas)}" class="empty-state card" style="padding:2.5rem">
-      <div class="icon">📋</div>
-      <h3>Aún no has solicitado servicios</h3>
-      <a href="/portal" class="btn btn-primary" style="margin-top:1rem">Explorar servicios</a>
+    <div class="card" th:if="${#lists.isEmpty(reservas)}" style="padding:2.5rem; text-align:center">
+      <div style="font-size:2.5rem; margin-bottom:0.75rem">📋</div>
+      <h3 style="font-weight:700; margin-bottom:0.5rem">Aún no has solicitado servicios</h3>
+      <p style="color:var(--gray); margin-bottom:1rem; font-size:0.875rem">Explora el portal y encuentra el servicio que necesitas</p>
+      <a href="/portal" class="btn btn-primary">Explorar servicios</a>
     </div>
 
     <div class="card" th:unless="${#lists.isEmpty(reservas)}">
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Servicio</th><th>Proveedor</th><th>Fecha</th><th>Precio Propuesto</th><th>Precio Acordado</th><th>Estado</th><th>Acción</th></tr></thead>
+          <thead><tr><th>Servicio</th><th>Proveedor</th><th>Fecha</th><th>Oferta</th><th>Acordado</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody>
             <tr th:each="r : ${reservas}">
               <td style="font-weight:600" th:text="${r.servicio.titulo}"></td>
               <td th:text="${r.servicio.usuario.nombreCompleto}"></td>
-              <td th:text="${r.fechaReserva}"></td>
+              <td style="font-weight:600" th:text="${r.fechaReserva}"></td>
               <td th:text="${r.precioPropuesto != null ? '$' + r.precioPropuesto : '-'}"></td>
-              <td th:text="${r.precioAcordado != null ? '$' + r.precioAcordado : '-'}"></td>
+              <td style="color:var(--success); font-weight:700" th:text="${r.precioAcordado != null ? '$' + r.precioAcordado : '-'}"></td>
               <td><span class="status-badge" th:classappend="'status-' + ${r.estado}" th:text="${r.estado}"></span></td>
               <td>
-                <div style="display:flex; gap:0.5rem; flex-wrap:wrap">
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap">
                   <a th:href="@{/reservas/chat/{id}(id=${r.id})}" class="btn btn-primary btn-sm">💬 Chat</a>
-                  <form th:if="${r.estado == 'NEGOCIANDO'}" th:action="@{/reservas/{id}/aceptar-precio(id=${r.id})}" method="post">
-                    <button type="submit" class="btn btn-secondary btn-sm">✅ Aceptar precio</button>
+                  <form th:if="${r.estado == 'NEGOCIANDO'}" th:action="@{/reservas/{id}/aceptar-precio(id=${r.id})}" method="post" style="display:inline">
+                    <button class="btn btn-success btn-sm">✅ Aceptar precio</button>
                   </form>
-                  <form th:if="${r.estado == 'ACEPTADA'}" th:action="@{/reservas/{id}/finalizar(id=${r.id})}" method="post">
-                    <button type="submit" class="btn btn-sm" style="background:#0C4A6E;color:white">Finalizar</button>
+                  <form th:if="${r.estado == 'ACEPTADA'}" th:action="@{/reservas/{id}/finalizar(id=${r.id})}" method="post" style="display:inline">
+                    <button class="btn btn-sm" style="background:#1E40AF;color:white">🎉 Finalizar</button>
                   </form>
-                  <form th:if="${r.estado == 'PENDIENTE' or r.estado == 'NEGOCIANDO'}" th:action="@{/reservas/{id}/cancelar(id=${r.id})}" method="post" onsubmit="return confirm('¿Cancelar esta reserva?')">
-                    <button type="submit" class="btn btn-danger btn-sm">Cancelar</button>
+                  <form th:if="${r.estado == 'PENDIENTE' or r.estado == 'NEGOCIANDO'}" th:action="@{/reservas/{id}/cancelar(id=${r.id})}" method="post" style="display:inline">
+                    <button class="btn btn-danger btn-sm" onclick="return confirm('¿Cancelar esta reserva?')">✕</button>
                   </form>
                 </div>
               </td>
@@ -70,37 +79,40 @@
     </div>
   </div>
 
-  <!-- Reservas recibidas como proveedor -->
+  <!-- Recibidas -->
   <div>
     <div class="page-header">
-      <div class="page-title" style="font-size:1.3rem">📥 Solicitudes recibidas</div>
+      <div>
+        <div class="page-title">📥 Solicitudes <span>recibidas</span></div>
+        <div class="page-subtitle">Usuarios que quieren contratar tus servicios</div>
+      </div>
     </div>
 
-    <div th:if="${#lists.isEmpty(recibidas)}" class="empty-state card" style="padding:2.5rem">
-      <div class="icon">📬</div>
-      <h3>Aún no has recibido solicitudes</h3>
-      <p style="margin-bottom:1rem">Cuando alguien solicite tus servicios, aparecerán aquí</p>
+    <div class="card" th:if="${#lists.isEmpty(recibidas)}" style="padding:2.5rem; text-align:center">
+      <div style="font-size:2.5rem; margin-bottom:0.75rem">📬</div>
+      <h3 style="font-weight:700; margin-bottom:0.5rem">Aún no has recibido solicitudes</h3>
+      <p style="color:var(--gray); font-size:0.875rem">Cuando alguien solicite tus servicios aparecerán aquí</p>
     </div>
 
     <div class="card" th:unless="${#lists.isEmpty(recibidas)}">
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Servicio</th><th>Solicitante</th><th>Fecha</th><th>Precio</th><th>Estado</th><th>Acción</th></tr></thead>
+          <thead><tr><th>Servicio</th><th>Solicitante</th><th>Fecha</th><th>Precio ofrecido</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody>
             <tr th:each="r : ${recibidas}">
               <td style="font-weight:600" th:text="${r.servicio.titulo}"></td>
               <td th:text="${r.solicitante.nombreCompleto}"></td>
-              <td th:text="${r.fechaReserva}"></td>
-              <td th:text="${r.precioPropuesto != null ? '$' + r.precioPropuesto : '-'}"></td>
+              <td style="font-weight:600" th:text="${r.fechaReserva}"></td>
+              <td style="color:var(--primary); font-weight:700" th:text="${r.precioPropuesto != null ? '$' + r.precioPropuesto : 'No especificado'}"></td>
               <td><span class="status-badge" th:classappend="'status-' + ${r.estado}" th:text="${r.estado}"></span></td>
               <td>
-                <div style="display:flex; gap:0.5rem; flex-wrap:wrap">
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap">
                   <a th:href="@{/reservas/chat/{id}(id=${r.id})}" class="btn btn-primary btn-sm">💬 Chat</a>
-                  <form th:if="${r.estado == 'PENDIENTE' or r.estado == 'NEGOCIANDO'}" th:action="@{/reservas/{id}/aceptar(id=${r.id})}" method="post">
-                    <button type="submit" class="btn btn-secondary btn-sm">✅ Aceptar</button>
+                  <form th:if="${r.estado == 'PENDIENTE' or r.estado == 'NEGOCIANDO'}" th:action="@{/reservas/{id}/aceptar(id=${r.id})}" method="post" style="display:inline">
+                    <button class="btn btn-success btn-sm">✅ Aceptar</button>
                   </form>
-                  <form th:if="${r.estado == 'PENDIENTE' or r.estado == 'NEGOCIANDO'}" th:action="@{/reservas/{id}/rechazar(id=${r.id})}" method="post">
-                    <button type="submit" class="btn btn-danger btn-sm">✕ Rechazar</button>
+                  <form th:if="${r.estado == 'PENDIENTE' or r.estado == 'NEGOCIANDO'}" th:action="@{/reservas/{id}/rechazar(id=${r.id})}" method="post" style="display:inline">
+                    <button class="btn btn-danger btn-sm">✕ Rechazar</button>
                   </form>
                 </div>
               </td>
