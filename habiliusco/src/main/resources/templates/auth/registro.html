@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro - HabiliUSCO</title>
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card" style="max-width:500px">
+    <img src="/images/usco-logo.png" alt="USCO" class="auth-logo-usco">
+    <div class="auth-brand">Habili<span>USCO</span></div>
+    <div class="auth-title">Crear cuenta</div>
+    <div class="auth-subtitle">Únete a la comunidad universitaria USCO</div>
+
+    <div style="height:3px; background:linear-gradient(90deg,var(--primary),var(--gold)); border-radius:2px; margin:1.25rem 0"></div>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
+
+    <form th:action="@{/registro}" method="post">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem">
+        <div class="form-group">
+          <label class="form-label">Nombre completo *</label>
+          <input type="text" name="nombreCompleto" class="form-control" placeholder="Tu nombre" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Usuario *</label>
+          <input type="text" name="username" class="form-control" placeholder="usuario123" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email *</label>
+        <input type="email" name="email" class="form-control" placeholder="nombre@usco.edu.co" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña *</label>
+        <input type="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem">
+        <div class="form-group">
+          <label class="form-label">Facultad</label>
+          <select name="facultad" class="form-control">
+            <option value="">Selecciona...</option>
+            <option>Ingeniería</option>
+            <option>Ciencias Sociales</option>
+            <option>Ciencias de la Salud</option>
+            <option>Educación</option>
+            <option>Ciencias Jurídicas</option>
+            <option>Economía y Administración</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Programa</label>
+          <input type="text" name="programa" class="form-control" placeholder="Tu programa">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teléfono</label>
+        <input type="tel" name="telefono" class="form-control" placeholder="300 000 0000">
+      </div>
+      <button type="submit" class="btn btn-primary btn-full btn-lg">Crear cuenta</button>
+    </form>
+
+    <p style="text-align:center; margin-top:1.25rem; font-size:0.875rem; color:var(--gray)">
+      ¿Ya tienes cuenta? <a href="/login" style="color:var(--primary); font-weight:700">Inicia sesión</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>

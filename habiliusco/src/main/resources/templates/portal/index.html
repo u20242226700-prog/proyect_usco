@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal - HabiliUSCO</title>
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/portal" class="nav-brand">
+      <img src="/images/usco-logo.png" alt="USCO" class="nav-logo-img">
+      <div class="nav-brand-text">
+        <div class="nav-brand-name">Habili<span>USCO</span></div>
+        <div class="nav-brand-sub">Universidad Surcolombiana</div>
+      </div>
+    </a>
+
+    <form class="nav-search" th:action="@{/portal}" method="get">
+      <input type="text" name="q" placeholder="🔍 Buscar servicios..." th:value="${busqueda}">
+      <button type="submit" class="btn btn-gold btn-sm">Buscar</button>
+    </form>
+
+    <div class="nav-links">
+      <a href="/portal" class="nav-link active">🏠 Inicio</a>
+      <a href="/mis-servicios" class="nav-link">🛠 Mis Servicios</a>
+      <a href="/reservas/mis-reservas" class="nav-link nav-badge">
+        📅 Mis Reservas
+        <span class="badge-count" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}"></span>
+      </a>
+      <a href="/calendario" class="nav-link" title="Mi disponibilidad">🗓</a>
+      <a href="/perfil" class="nav-link">👤 Perfil</a>
+      <sec:authorize access="hasRole('ADMIN')">
+        <a href="/admin" class="nav-link nav-link-gold">⚙ Admin</a>
+      </sec:authorize>
+      <span class="nav-greeting" style="display:flex;align-items:center;gap:0.4rem"><span>Hola,</span> <strong sec:authentication="name"></strong></span>
+      <form th:action="@{/logout}" method="post" style="display:inline"><button type="submit" class="btn btn-outline btn-sm">Salir</button></form>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div th:if="${busqueda == null and categoriaActiva == null}" class="hero-banner">
+  <div class="hero-content">
+    <h1 class="hero-title">Intercambia <span>habilidades</span> en la USCO</h1>
+    <p class="hero-sub">Conecta con compañeros universitarios · Ofrece y recibe servicios · Crece juntos</p>
+    <form class="hero-search" th:action="@{/portal}" method="get">
+      <input type="text" name="q" placeholder="¿Qué servicio necesitas? Ej: Cálculo, Diseño, Inglés...">
+      <button type="submit" class="btn btn-gold btn-lg">🔍 Buscar</button>
+    </form>
+    <div class="hero-tags">
+      <a href="/portal?categoria=MONITORIA" class="hero-tag">📚 Monitorías</a>
+      <a href="/portal?categoria=PROGRAMACION" class="hero-tag">💻 Programación</a>
+      <a href="/portal?categoria=DISEÑO" class="hero-tag">🎨 Diseño</a>
+      <a href="/portal?categoria=REPARACION" class="hero-tag">🔧 Reparación</a>
+      <a href="/portal?categoria=TUTORIA" class="hero-tag">🎓 Tutorías</a>
+      <a href="/portal?categoria=TRADUCCION" class="hero-tag">🌐 Traducción</a>
+    </div>
+  </div>
+</div>
+
+<div class="page-container">
+
+  <div th:if="${busqueda != null or categoriaActiva != null}" class="page-header">
+    <div>
+      <div class="page-title" th:if="${busqueda != null}">🔍 "<span th:text="${busqueda}"></span>"</div>
+      <div class="page-title" th:if="${categoriaActiva != null}">📂 <span th:text="${categoriaActiva}"></span></div>
+      <div class="page-subtitle" th:text="${#lists.size(servicios)} + ' servicios encontrados'"></div>
+    </div>
+    <a href="/portal" class="btn btn-ghost btn-sm">✕ Ver todos</a>
+  </div>
+
+  <!-- Filtros + precio -->
+  <div class="filter-bar">
+    <span style="font-weight:700; color:var(--dark); font-size:0.82rem; white-space:nowrap">📂</span>
+    <div class="filter-chips">
+      <a href="/portal" class="chip" th:classappend="${categoriaActiva == null and busqueda == null} ? 'active' : ''">Todos</a>
+      <a th:each="cat : ${categorias}" th:href="@{/portal(categoria=${cat})}" th:text="${cat}"
+         class="chip" th:classappend="${cat == categoriaActiva} ? 'active' : ''"></a>
+    </div>
+    <!-- Filtro precio -->
+    <form th:action="@{/portal}" method="get" style="display:flex; align-items:center; gap:0.5rem">
+      <input type="hidden" name="categoria" th:value="${categoriaActiva}">
+      <div class="price-filter">
+        <span>$</span>
+        <input type="number" name="precioMin" placeholder="Min" th:value="${precioMin}" min="0" step="1000">
+        <span>—</span>
+        <input type="number" name="precioMax" placeholder="Max" th:value="${precioMax}" min="0" step="1000">
+        <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+      </div>
+    </form>
+    <a href="/mis-servicios/nuevo" class="btn btn-primary btn-sm" style="white-space:nowrap; margin-left:auto">+ Publicar</a>
+  </div>
+
+  <div th:if="${#lists.isEmpty(servicios)}" class="empty-state card" style="margin-top:1rem; padding:4rem">
+    <div class="icon">🔍</div>
+    <h3>No se encontraron servicios</h3>
+    <p style="margin-bottom:1.5rem">Intenta con otra búsqueda o publica el primero</p>
+    <a href="/mis-servicios/nuevo" class="btn btn-primary">+ Publicar servicio</a>
+  </div>
+
+  <div class="services-grid" th:unless="${#lists.isEmpty(servicios)}">
+    <div th:each="s : ${servicios}" class="service-card">
+      <div class="service-card-header">
+        <div class="category-icon" th:switch="${s.categoria}">
+          <span th:case="'MONITORIA'">📚</span><span th:case="'REPARACION'">🔧</span>
+          <span th:case="'DISEÑO'">🎨</span><span th:case="'PROGRAMACION'">💻</span>
+          <span th:case="'TRADUCCION'">🌐</span><span th:case="'TUTORIA'">🎓</span>
+          <span th:case="*">⭐</span>
+        </div>
+        <div style="flex:1; min-width:0">
+          <div class="service-title" th:text="${s.titulo}"></div>
+          <div class="service-user">👤 <span th:text="${s.usuario.nombreCompleto}"></span></div>
+        </div>
+      </div>
+      <div class="service-card-body">
+        <span class="category-badge" th:text="${s.categoria}"></span>
+        <p class="service-desc" th:text="${s.descripcion}" style="margin-top:0.5rem"></p>
+      </div>
+      <div class="service-card-footer">
+        <div>
+          <div class="price-tag" th:if="${s.precioBase != null}" th:text="'$' + ${#numbers.formatDecimal(s.precioBase,0,'COMMA',0,'POINT')} + ' COP'"></div>
+          <div class="price-tag no-price" th:unless="${s.precioBase != null}">💬 Precio negociable</div>
+        </div>
+        <a th:href="@{/portal/servicio/{id}(id=${s.id})}" class="btn btn-primary btn-sm">Ver →</a>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:3rem; padding:1.25rem 1.5rem; background:var(--primary-light); border-radius:var(--radius); border-left:4px solid var(--primary); display:flex; gap:2rem; flex-wrap:wrap; align-items:center">
+    <div style="font-size:0.875rem; color:var(--primary); font-weight:600">🎓 Plataforma exclusiva USCO</div>
+    <div style="font-size:0.875rem; color:var(--gray)">📍 Neiva, Huila · Colombia</div>
+    <div style="font-size:0.875rem; color:var(--gray)">✉ dani.jim2007@gmail.com - soporte@usco.edu.co</div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>

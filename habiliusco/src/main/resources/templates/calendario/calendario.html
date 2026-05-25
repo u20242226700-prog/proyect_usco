@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Disponibilidad - HabiliUSCO</title>
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/portal" class="nav-brand">
+      <img src="/images/usco-logo.png" alt="USCO" class="nav-logo-img">
+      <div class="nav-brand-text">
+        <div class="nav-brand-name">Habili<span>USCO</span></div>
+        <div class="nav-brand-sub">Universidad Surcolombiana</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="/portal" class="nav-link">🏠 Inicio</a>
+      <a href="/mis-servicios" class="nav-link">🛠 Mis Servicios</a>
+      <a href="/reservas/mis-reservas" class="nav-link">📅 Mis Reservas</a>
+      <a href="/calendario" class="nav-link active">🗓 Disponibilidad</a>
+      <a href="/perfil" class="nav-link">👤 Perfil</a>
+      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link nav-link-gold">⚙ Admin</a></sec:authorize>
+      <span class="nav-greeting">Hola, <strong sec:authentication="name"></strong></span>
+      <form th:action="@{/logout}" method="post" style="display:inline"><button type="submit" class="btn btn-outline btn-sm">Salir</button></form>
+    </div>
+  </div>
+</nav>
+
+<div class="page-container" style="max-width:900px">
+  <div class="page-header">
+    <div>
+      <div class="page-title">🗓 Mi <span>Disponibilidad</span></div>
+      <div class="page-subtitle">Bloquea fechas en las que no puedes atender servicios</div>
+    </div>
+  </div>
+
+  <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem">
+
+    <!-- Bloquear fecha -->
+    <div class="card" style="border-top:4px solid var(--primary)">
+      <div style="padding:1rem 1.25rem; font-weight:800; border-bottom:1px solid var(--border)">🚫 Bloquear fecha</div>
+      <div class="card-body">
+        <form th:action="@{/calendario/bloquear}" method="post">
+          <div class="form-group">
+            <label class="form-label">Fecha a bloquear</label>
+            <input type="date" name="fecha" class="form-control" required id="fechaBloqueo">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Motivo (opcional)</label>
+            <input type="text" name="motivo" class="form-control" placeholder="Ej: Examen parcial, viaje...">
+          </div>
+          <button type="submit" class="btn btn-danger btn-full">🚫 Bloquear esta fecha</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Fechas bloqueadas -->
+    <div class="card" style="border-top:4px solid var(--gold)">
+      <div style="padding:1rem 1.25rem; font-weight:800; border-bottom:1px solid var(--border)">
+        📋 Fechas bloqueadas (<span th:text="${#lists.size(bloqueos)}"></span>)
+      </div>
+      <div class="card-body" style="max-height:350px; overflow-y:auto">
+        <div th:if="${#lists.isEmpty(bloqueos)}" class="empty-state" style="padding:2rem">
+          <div class="icon" style="font-size:2rem">✅</div>
+          <h3 style="font-size:0.95rem">Sin fechas bloqueadas</h3>
+          <p style="font-size:0.82rem">Estás disponible todos los días</p>
+        </div>
+        <div th:each="b : ${bloqueos}" style="display:flex; align-items:center; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border)">
+          <div>
+            <div style="font-weight:700; font-size:0.9rem" th:text="${b.fechaBloqueada}"></div>
+            <div style="font-size:0.78rem; color:var(--gray)" th:text="${b.motivo != null ? b.motivo : 'Sin motivo'}"></div>
+          </div>
+          <form th:action="@{/calendario/desbloquear/{id}(id=${b.id})}" method="post">
+            <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger)">✕ Quitar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1.5rem; padding:1.25rem">
+    <div style="font-weight:800; margin-bottom:0.75rem; color:var(--dark)">ℹ ¿Para qué sirve esto?</div>
+    <div style="font-size:0.875rem; color:var(--gray); line-height:1.7">
+      Cuando alguien quiera reservar tu servicio en una fecha bloqueada, el sistema le mostrará que esa fecha no está disponible y le pedirá escoger otra. Esto te ayuda a gestionar tu tiempo y evitar compromisos que no puedes cumplir.
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('fechaBloqueo').min = new Date().toISOString().split('T')[0];
+</script>
+<script src="/js/app.js"></script>
+</body>
+</html>

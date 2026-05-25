@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title th:text="${usuario.nombreCompleto} + ' - HabiliUSCO'"></title>
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/portal" class="nav-brand">
+      <div class="nav-logo">U</div>
+      <div class="nav-brand-text">
+        <div class="nav-brand-name">Habili<span>USCO</span></div>
+        <div class="nav-brand-sub">Universidad Surcolombiana</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="/portal" class="nav-link">🏠 Explorar</a>
+      <a href="/mis-servicios" class="nav-link">📋 Mis Servicios</a>
+      <a href="/reservas/mis-reservas" class="nav-link nav-badge">
+        📅 Reservas
+        <span class="badge-count" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}"></span>
+      </a>
+      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link nav-link-gold">⚙ Admin</a></sec:authorize>
+      <form th:action="@{/logout}" method="post" style="display:inline"><button type="submit" class="btn btn-outline btn-sm">Salir</button></form>
+    </div>
+  </div>
+</nav>
+
+<div class="page-container" style="max-width:900px">
+  <div style="margin-bottom:1rem"><a href="/portal" style="color:var(--primary); text-decoration:none; font-weight:600">← Volver al portal</a></div>
+
+  <div class="card" style="margin-bottom:1.5rem; border-top:4px solid var(--primary)">
+    <div class="card-body" style="display:flex; gap:2rem; align-items:center; flex-wrap:wrap">
+      <div style="width:90px; height:90px; border-radius:50%; overflow:hidden; border:3px solid var(--gold); background:var(--primary-light); flex-shrink:0">
+        <img th:if="${usuario.fotoUrl != null}" th:src="${usuario.fotoUrl}" alt="Foto" style="width:100%; height:100%; object-fit:cover">
+        <div th:unless="${usuario.fotoUrl != null}" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2.2rem; font-weight:900; color:var(--primary)"
+             th:text="${#strings.substring(usuario.nombreCompleto,0,1)}"></div>
+      </div>
+      <div style="flex:1">
+        <h1 style="font-weight:900; font-size:1.5rem" th:text="${usuario.nombreCompleto}"></h1>
+        <div style="color:var(--gray); font-size:0.875rem">@<span th:text="${usuario.username}"></span></div>
+        <div th:if="${usuario.facultad != null}" style="color:var(--primary); font-size:0.875rem; margin-top:0.25rem">🏛 <span th:text="${usuario.facultad}"></span> · <span th:text="${usuario.programa}"></span></div>
+        <div th:if="${usuario.bio != null and !usuario.bio.isEmpty()}" style="margin-top:0.5rem; font-size:0.9rem; color:var(--dark)" th:text="${usuario.bio}"></div>
+      </div>
+      <div th:if="${esPropio}">
+        <a href="/perfil" class="btn btn-outline-red btn-sm">✏ Editar mi perfil</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-title" style="margin-bottom:1rem">🛠 Servicios de <span th:text="${usuario.nombreCompleto}"></span></div>
+
+  <div th:if="${#lists.isEmpty(servicios)}" class="empty-state card" style="padding:3rem">
+    <div class="icon">📋</div>
+    <h3>Este usuario no tiene servicios publicados</h3>
+  </div>
+
+  <div class="services-grid" th:unless="${#lists.isEmpty(servicios)}">
+    <div th:each="s : ${servicios}" class="service-card" th:if="${s.estado == 'ACTIVO'}">
+      <div class="service-card-header">
+        <div class="category-icon" th:switch="${s.categoria}">
+          <span th:case="'MONITORIA'">📚</span><span th:case="'REPARACION'">🔧</span>
+          <span th:case="'DISEÑO'">🎨</span><span th:case="'PROGRAMACION'">💻</span>
+          <span th:case="'TRADUCCION'">🌐</span><span th:case="'TUTORIA'">🎓</span>
+          <span th:case="*">⭐</span>
+        </div>
+        <div>
+          <div class="service-title" th:text="${s.titulo}"></div>
+          <span class="category-badge" th:text="${s.categoria}"></span>
+        </div>
+      </div>
+      <div class="service-card-body">
+        <p class="service-desc" th:text="${s.descripcion}"></p>
+      </div>
+      <div class="service-card-footer">
+        <div class="price-tag" th:if="${s.precioBase != null}" th:text="'$' + ${s.precioBase} + ' COP'"></div>
+        <div class="price-tag no-price" th:unless="${s.precioBase != null}">Negociable</div>
+        <a th:href="@{/portal/servicio/{id}(id=${s.id})}" class="btn btn-primary btn-sm">Ver →</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>

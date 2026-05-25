@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Perfil - HabiliUSCO</title>
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/portal" class="nav-brand">
+      <img src="/images/usco-logo.png" alt="USCO" class="nav-logo-img">
+      <div class="nav-brand-text">
+        <div class="nav-brand-name">Habili<span>USCO</span></div>
+        <div class="nav-brand-sub">Universidad Surcolombiana</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="/portal" class="nav-link">🏠 Inicio</a>
+      <a href="/mis-servicios" class="nav-link">🛠 Mis Servicios</a>
+      <a href="/reservas/mis-reservas" class="nav-link">📅 Mis Reservas</a>
+      <a href="/perfil" class="nav-link active">👤 Perfil</a>
+      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link nav-link-gold">⚙ Admin</a></sec:authorize>
+      <span class="nav-greeting">Hola, <strong sec:authentication="name"></strong></span>
+      <form th:action="@{/logout}" method="post" style="display:inline">
+        <button type="submit" class="btn btn-outline btn-sm">Salir</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="page-container" style="max-width:1000px">
+  <div class="page-header">
+    <div>
+      <div class="page-title">👤 Mi <span>Perfil</span></div>
+      <div class="page-subtitle">Administra tu información personal</div>
+    </div>
+  </div>
+
+  <!-- Alertas -->
+  <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
+  <div th:if="${exitoFoto}" class="alert alert-success" th:text="${exitoFoto}"></div>
+  <div th:if="${errorFoto}" class="alert alert-danger" th:text="${errorFoto}"></div>
+  <div th:if="${errorPassword}" class="alert alert-danger" th:text="${errorPassword}"></div>
+
+  <div style="display:grid; grid-template-columns:280px 1fr; gap:1.5rem; align-items:start">
+
+    <!-- Tarjeta de foto -->
+    <div>
+      <div class="card" style="border-top:4px solid var(--primary); text-align:center">
+        <div class="card-body">
+          <!-- Avatar -->
+          <div style="position:relative; width:120px; height:120px; margin:0 auto 1rem; border-radius:50%; overflow:hidden; border:4px solid var(--primary); box-shadow:0 4px 15px rgba(200,16,46,0.2)">
+            <img th:if="${usuario.fotoUrl != null}" th:src="${usuario.fotoUrl}" alt="Foto"
+                 style="width:100%; height:100%; object-fit:cover">
+            <div th:unless="${usuario.fotoUrl != null}"
+                 style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--primary-light); font-size:2.5rem; font-weight:900; color:var(--primary)"
+                 th:text="${#strings.substring(usuario.nombreCompleto, 0, 1)}"></div>
+          </div>
+
+          <div style="font-weight:800; font-size:1.1rem; color:var(--dark); margin-bottom:0.25rem" th:text="${usuario.nombreCompleto}"></div>
+          <div style="font-size:0.82rem; color:var(--gray)" th:text="'@' + ${usuario.username}"></div>
+          <div style="font-size:0.78rem; color:var(--primary); font-weight:600; margin-top:0.25rem" th:text="${usuario.facultad}"></div>
+
+          <!-- Subir foto -->
+          <div style="margin-top:1.25rem; border-top:1px solid var(--border); padding-top:1.25rem">
+            <div style="font-weight:700; font-size:0.875rem; margin-bottom:0.75rem; color:var(--dark)">📸 Cambiar foto</div>
+            <form th:action="@{/perfil/foto}" method="post" enctype="multipart/form-data">
+              <label style="display:block; cursor:pointer">
+                <div style="border:2px dashed var(--primary); border-radius:8px; padding:1rem; background:var(--primary-light); transition:all 0.2s"
+                     id="dropzone">
+                  <div style="font-size:1.5rem; margin-bottom:0.25rem">📁</div>
+                  <div style="font-size:0.78rem; color:var(--primary); font-weight:600">Click para seleccionar</div>
+                  <div style="font-size:0.72rem; color:var(--gray); margin-top:0.2rem">JPG, PNG · máx 5MB</div>
+                </div>
+                <input type="file" name="foto" accept="image/*" style="display:none" id="fotoInput"
+                       onchange="previewFoto(this)">
+              </label>
+              <!-- Preview -->
+              <div id="previewContainer" style="display:none; margin-top:0.75rem">
+                <img id="previewImg" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); margin:0 auto; display:block">
+                <div id="previewName" style="font-size:0.75rem; color:var(--gray); text-align:center; margin-top:0.35rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap"></div>
+                <button type="submit" class="btn btn-primary btn-full" style="margin-top:0.75rem">✅ Guardar foto</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Stats -->
+          <div style="margin-top:1rem; display:grid; grid-template-columns:1fr 1fr; gap:0.5rem">
+            <div style="background:var(--primary-light); border-radius:8px; padding:0.75rem">
+              <div style="font-size:1.4rem; font-weight:900; color:var(--primary)" th:text="${totalServicios}">0</div>
+              <div style="font-size:0.7rem; color:var(--gray)">Servicios</div>
+            </div>
+            <div style="background:var(--gold-light); border-radius:8px; padding:0.75rem; border:1px solid var(--gold)">
+              <div style="font-size:1.4rem; font-weight:900; color:var(--gold-dark)" th:text="${totalReservas}">0</div>
+              <div style="font-size:0.7rem; color:var(--gray)">Reservas</div>
+            </div>
+          </div>
+
+          <a th:href="@{/perfil/{u}(u=${usuario.username})}" class="btn btn-ghost btn-sm btn-full" style="margin-top:1rem">
+            👁 Ver perfil público
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos personales -->
+    <div style="display:flex; flex-direction:column; gap:1.25rem">
+
+      <!-- Editar datos -->
+      <div class="card" style="border-top:4px solid var(--gold)">
+        <div style="padding:1rem 1.25rem; font-weight:800; border-bottom:1px solid var(--border)">✏ Editar información</div>
+        <div class="card-body">
+          <form th:action="@{/perfil/actualizar}" method="post">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem">
+              <div class="form-group">
+                <label class="form-label">Nombre completo *</label>
+                <input type="text" name="nombreCompleto" class="form-control" th:value="${usuario.nombreCompleto}" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Teléfono</label>
+                <input type="tel" name="telefono" class="form-control" th:value="${usuario.telefono}" placeholder="300 000 0000">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Facultad</label>
+                <select name="facultad" class="form-control">
+                  <option value="">Selecciona...</option>
+                  <option th:each="f : ${ {'Ingeniería','Ciencias Sociales','Ciencias de la Salud','Educación','Ciencias Jurídicas','Economía y Administración'} }"
+                          th:value="${f}" th:text="${f}" th:selected="${f == usuario.facultad}"></option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Programa</label>
+                <input type="text" name="programa" class="form-control" th:value="${usuario.programa}" placeholder="Tu carrera">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Biografía</label>
+              <textarea name="bio" class="form-control" rows="3" placeholder="Cuéntale a otros quién eres y qué ofreces..." th:text="${usuario.bio}"></textarea>
+            </div>
+            <button type="submit" class="btn btn-gold">💾 Guardar cambios</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Cambiar contraseña -->
+      <div class="card" style="border-top:4px solid var(--gray)">
+        <div style="padding:1rem 1.25rem; font-weight:800; border-bottom:1px solid var(--border)">🔒 Cambiar contraseña</div>
+        <div class="card-body">
+          <form th:action="@{/perfil/cambiar-password}" method="post">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem">
+              <div class="form-group">
+                <label class="form-label">Contraseña actual</label>
+                <input type="password" name="passwordActual" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nueva contraseña</label>
+                <input type="password" name="passwordNueva" class="form-control" required minlength="6">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirmar nueva</label>
+                <input type="password" name="passwordConfirm" class="form-control" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-outline-red">🔒 Cambiar contraseña</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Info cuenta -->
+      <div class="card">
+        <div class="card-body" style="display:flex; gap:2rem; flex-wrap:wrap">
+          <div>
+            <div style="font-size:0.75rem; color:var(--gray); font-weight:600; text-transform:uppercase">Email</div>
+            <div style="font-weight:600" th:text="${usuario.email}"></div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem; color:var(--gray); font-weight:600; text-transform:uppercase">Usuario</div>
+            <div style="font-weight:600" th:text="'@' + ${usuario.username}"></div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem; color:var(--gray); font-weight:600; text-transform:uppercase">Estado</div>
+            <div><span class="status-badge status-ACTIVO">✅ Activo</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function previewFoto(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('previewName').textContent = file.name;
+      document.getElementById('previewContainer').style.display = 'block';
+      document.getElementById('dropzone').style.borderColor = 'var(--success)';
+    };
+    reader.readAsDataURL(file);
+  }
+}
+</script>
+<script src="/js/app.js"></script>
+</body>
+</html>

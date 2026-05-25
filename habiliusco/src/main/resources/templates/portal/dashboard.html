@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - HabiliUSCO</title>
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/portal" class="nav-brand">
+      <div class="nav-logo">U</div>
+      <div class="nav-brand-text">
+        <div class="nav-brand-name">Habili<span>USCO</span></div>
+        <div class="nav-brand-sub">Universidad Surcolombiana</div>
+      </div>
+    </a>
+    <form class="nav-search" th:action="@{/portal}" method="get">
+      <input type="text" name="q" placeholder="🔍 Buscar servicios...">
+      <button type="submit" class="btn btn-gold btn-sm">Buscar</button>
+    </form>
+    <div class="nav-links">
+      <a href="/portal" class="nav-link active">🏠 Inicio</a>
+      <a href="/mis-servicios" class="nav-link">🛠 Mis Servicios</a>
+      <a href="/reservas/mis-reservas" class="nav-link nav-badge">
+        📅 Mis Reservas
+        <span class="badge-count" th:if="${mensajesNoLeidos != null and mensajesNoLeidos > 0}" th:text="${mensajesNoLeidos}"></span>
+      </a>
+      <a href="/perfil" class="nav-link">👤 Perfil</a>
+      <sec:authorize access="hasRole('ADMIN')"><a href="/admin" class="nav-link nav-link-gold">⚙ Admin</a></sec:authorize>
+      <span style="color:rgba(255,255,255,0.75); font-size:0.82rem; white-space:nowrap; padding:0 0.25rem">Hola, <strong sec:authentication="name"></strong></span>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Salir</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page-container">
+  <!-- Bienvenida -->
+  <div style="background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:var(--radius); padding:2rem; color:white; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem">
+    <div>
+      <h2 style="font-size:1.5rem; font-weight:900; margin-bottom:0.25rem">
+        Bienvenido, <span th:text="${usuario.nombreCompleto}"></span> 👋
+      </h2>
+      <p style="opacity:0.85; font-size:0.9rem" th:text="${usuario.facultad} + ' · ' + ${usuario.programa}"></p>
+    </div>
+    <div style="display:flex; gap:0.75rem; flex-wrap:wrap">
+      <a href="/mis-servicios/nuevo" class="btn btn-gold">🚀 Publicar servicio</a>
+      <a href="/portal" class="btn btn-outline">🔍 Explorar servicios</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" style="margin-bottom:1.5rem">
+    <div class="stat-card">
+      <div class="stat-icon">🛠</div>
+      <div><div class="stat-value" th:text="${misServicios}"></div><div class="stat-label">Mis servicios publicados</div></div>
+    </div>
+    <div class="stat-card" style="border-left-color:var(--gold)">
+      <div class="stat-icon" style="background:var(--gold-light)">📤</div>
+      <div><div class="stat-value" th:text="${reservasEnviadas}"></div><div class="stat-label">Solicitudes enviadas</div></div>
+    </div>
+    <div class="stat-card" style="border-left-color:var(--success)">
+      <div class="stat-icon" style="background:#D1FAE5">📥</div>
+      <div><div class="stat-value" th:text="${reservasRecibidas}"></div><div class="stat-label">Solicitudes recibidas</div></div>
+    </div>
+    <div class="stat-card" style="border-left-color:var(--info)">
+      <div class="stat-icon" style="background:#DBEAFE">💬</div>
+      <div><div class="stat-value" th:text="${mensajesNoLeidos}"></div><div class="stat-label">Mensajes sin leer</div></div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem">
+    <!-- Accesos rápidos -->
+    <div class="card">
+      <div style="padding:1rem 1.25rem; font-weight:800; border-bottom:1px solid var(--border)">⚡ Accesos rápidos</div>
+      <div class="card-body" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem">
+        <a href="/portal" class="card" style="padding:1rem; text-align:center; text-decoration:none; border-top:3px solid var(--primary)">
+          <div style="font-size:1.75rem; margin-bottom:0.35rem">🔍</div>
+          <div style="font-weight:700; font-size:0.875rem; color:var(--dark)">Explorar</div>
+          <div style="font-size:0.78rem; color:var(--gray)">Ver servicios</div>
+        </a>
+        <a href="/mis-servicios/nuevo" class="card" style="padding:1rem; text-align:center; text-decoration:none; border-top:3px solid var(--gold)">
+          <div style="font-size:1.75rem; margin-bottom:0.35rem">🚀</div>
+          <div style="font-weight:700; font-size:0.875rem; color:var(--dark)">Publicar</div>
+          <div style="font-size:0.78rem; color:var(--gray)">Nuevo servicio</div>
+        </a>
+        <a href="/reservas/mis-reservas" class="card" style="padding:1rem; text-align:center; text-decoration:none; border-top:3px solid var(--success)">
+          <div style="font-size:1.75rem; margin-bottom:0.35rem">📅</div>
+          <div style="font-weight:700; font-size:0.875rem; color:var(--dark)">Reservas</div>
+          <div style="font-size:0.78rem; color:var(--gray)">Ver mis reservas</div>
+        </a>
+        <a href="/perfil" class="card" style="padding:1rem; text-align:center; text-decoration:none; border-top:3px solid var(--info)">
+          <div style="font-size:1.75rem; margin-bottom:0.35rem">👤</div>
+          <div style="font-weight:700; font-size:0.875rem; color:var(--dark)">Mi Perfil</div>
+          <div style="font-size:0.78rem; color:var(--gray)">Editar datos</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Actividad reciente -->
+    <div class="card">
+      <div style="padding:1rem 1.25rem; font-weight:800; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center">
+        <span>📋 Actividad reciente</span>
+        <a href="/reservas/mis-reservas" style="color:var(--primary); font-size:0.82rem; text-decoration:none; font-weight:600">Ver todas →</a>
+      </div>
+      <div class="card-body">
+        <div th:if="${reservasRecientes == null or #lists.isEmpty(reservasRecientes)}" class="empty-state" style="padding:2rem">
+          <div class="icon" style="font-size:2rem">📭</div>
+          <h3 style="font-size:0.95rem">Sin actividad reciente</h3>
+          <a href="/portal" class="btn btn-primary btn-sm" style="margin-top:0.75rem">Explorar servicios</a>
+        </div>
+        <div th:each="r : ${reservasRecientes}" style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem 0; border-bottom:1px solid var(--border)">
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0">📅</div>
+          <div style="flex:1; min-width:0">
+            <div style="font-weight:600; font-size:0.875rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis" th:text="${r.servicio.titulo}"></div>
+            <div style="font-size:0.78rem; color:var(--gray)" th:text="${r.fechaReserva}"></div>
+          </div>
+          <span class="status-badge" th:classappend="'status-' + ${r.estado}" th:text="${r.estado}" style="font-size:0.7rem"></span>
+          <a th:href="@{/reservas/chat/{id}(id=${r.id})}" class="btn btn-primary btn-sm" style="padding:0.25rem 0.6rem; font-size:0.75rem">Chat</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>

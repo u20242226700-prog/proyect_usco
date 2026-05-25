@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Servicios - Admin HabiliUSCO</title><link rel="stylesheet" href="/css/styles.css"></head>
+<body>
+<div class="admin-layout">
+  <div class="admin-sidebar">
+    <div class="logo">Habili<span>USCO</span></div>
+    <nav class="admin-nav">
+      <a href="/admin" class="admin-nav-link">📊 Dashboard</a>
+      <a href="/admin/usuarios" class="admin-nav-link">👥 Usuarios</a>
+      <a href="/admin/servicios" class="admin-nav-link active">🛠 Servicios</a>
+      <a href="/admin/reservas" class="admin-nav-link">📅 Reservas</a>
+      <a href="/admin/logs" class="admin-nav-link">📋 Logs</a>
+      <hr style="border-color:rgba(255,255,255,0.1); margin:1rem 0">
+      <a href="/portal" class="admin-nav-link">🏠 Portal</a>
+      <a href="#" class="admin-nav-link" onclick="logout()">🚪 Salir</a>
+    </nav>
+  </div>
+  <div class="admin-content">
+    <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
+    <h1 style="font-size:1.5rem; font-weight:900; margin-bottom:1.5rem">🛠 Gestión de Servicios</h1>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Título</th><th>Proveedor</th><th>Categoría</th><th>Precio</th><th>Estado</th><th>Publicado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            <tr th:each="s : ${servicios}">
+              <td style="font-weight:600" th:text="${s.titulo}"></td>
+              <td th:text="${s.usuario.nombreCompleto}"></td>
+              <td><span class="category-badge" th:text="${s.categoria}"></span></td>
+              <td th:text="${s.precioBase != null ? '$' + s.precioBase : 'Neg.'}"></td>
+              <td><span class="status-badge" th:classappend="'status-' + ${s.estado}" th:text="${s.estado}"></span></td>
+              <td style="font-size:0.8rem; color:var(--gray)" th:text="${#temporals.format(s.fechaPublicacion,'dd/MM/yy')}"></td>
+              <td>
+                <div style="display:flex; gap:0.35rem; flex-wrap:wrap">
+                  <form th:action="@{/admin/servicios/{id}/estado(id=${s.id})}" method="post" style="display:flex; gap:0.35rem">
+                    <select name="estado" class="form-control" style="padding:0.25rem 0.5rem; font-size:0.8rem; height:auto">
+                      <option value="ACTIVO">ACTIVO</option>
+                      <option value="PAUSADO">PAUSADO</option>
+                      <option value="INACTIVO">INACTIVO</option>
+                    </select>
+                    <button class="btn btn-outline btn-sm">Cambiar</button>
+                  </form>
+                  <form th:action="@{/admin/servicios/{id}/eliminar(id=${s.id})}" method="post" onsubmit="return confirm('¿Eliminar?')">
+                    <button class="btn btn-danger btn-sm">Eliminar</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>
